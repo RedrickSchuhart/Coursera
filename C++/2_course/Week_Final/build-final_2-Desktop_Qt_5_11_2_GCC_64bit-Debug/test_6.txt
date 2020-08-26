@@ -1,0 +1,32 @@
+Add 2017-01-21 sport event
+Add 2017-01-21 holiday
+Add 2017-1-20 holiday
+Add 2017-1-20 sport event
+Add 2017-11-21
+Add 17-11-21 holiday
+Add 7-11-21 sport event
+Add 2017-11-20 Monday
+Add 2017-2-21 e1
+Add 2017-2-21 sport event
+Add 2017-2-21 e2
+Print
+Find
+Find date < 2017-11-06
+Del event != "holiday" AND event != "sport event"
+Find date < 2017-11-06
+Find date >= 2017-01-01 AND date < 2017-07-01 AND event == "sport event"
+Print
+Del date < 2017-03-01 AND (event == "holiday" OR event == "sport event") 
+Find
+Print
+Del
+Add 2017-11-21 Tuesday
+Add 2017-11-20 Monday
+Add 2017-11-21 Weekly meeting
+Find
+Print
+Find event != "Weekly meeting"
+Last 2017-11-30
+Del date > 2017-11-20
+Last 2017-11-30
+Last 2017-11-01
