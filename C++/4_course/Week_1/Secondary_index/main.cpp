@@ -9,12 +9,18 @@
 
 using namespace std;
 
+
 struct Record {
     string id;
     string title;
     string user;
     int timestamp;
     int karma;
+};
+
+struct RecordWithIt {
+    Record it;
+    list<Record*>::const_iterator karma, time, user;
 };
 
 // Реализуйте этот класс
@@ -24,10 +30,13 @@ public:
         string id = record.id;
         list<string> l;
         if(data.find(id)==data.end()) {
-            data[id]=record;
-            bytime[record.timestamp].push_back(id);
-            bykarma[record.karma].push_back(id);
-            byuser[record.user].push_back(id);
+            data[id].it=record;
+            bytime[record.timestamp].push_back(&data[id].it);
+            data[id].time=--bytime[record.timestamp].end();
+            bykarma[record.karma].push_back(&data[id].it);
+            data[id].karma=--bykarma[record.karma].end();
+            byuser[record.user].push_back(&data[id].it);
+            data[id].user=--byuser[record.user].end();
             return true;
         } else {
             return false;
@@ -38,7 +47,7 @@ public:
         if(it==data.end()) {
             return nullptr;
         } else {
-            return &(*it).second;
+            return &(*it).second.it;
         }
     }
     bool Erase(const string& id) {
@@ -46,55 +55,58 @@ public:
         if(it==data.end()) {
             return false;
         } else {
-            auto& record = (*it).second;
-            bytime[record.timestamp].erase(find(bytime[record.timestamp].begin(), bytime[record.timestamp].end(), id));
-            bykarma[record.karma].erase(find(bykarma[record.karma].begin(), bykarma[record.karma].end(), id));
-            byuser[record.user].erase(find(byuser[record.user].begin(), byuser[record.user].end(), id));;
+            auto& record = (*it).second.it;
+            bytime[record.timestamp].erase((*it).second.time);
+            bykarma[record.karma].erase((*it).second.karma);
+            byuser[record.user].erase((*it).second.user);
             data.erase(it);
             return true;
         }
     }
 
+
     template <typename Callback>
-    void RangeByTimestamp(int low, int high, Callback callback) const {
-        auto end = bytime.find(high);
-        end++;
-        for(auto it = bytime.find(low); it!=end; it++) {
-            for(auto item:(*it).second) {
-                callback;
+    void RangeByTimestamp(int low, int high, Callback callback) const{
+        auto end = bytime.upper_bound(high);
+        for(auto it = bytime.lower_bound(low); it!=end; it++) {
+            for(auto item : (*it).second) {
+                if(callback(*item)==false)
+                    return;
             }
         }
+        return;
     }
 
     template <typename Callback>
-    void RangeByKarma(int low, int high, Callback callback) const {
-        auto end = bykarma.find(high);
-        end++;
-        int i =0;
-        for(auto it = bykarma.find(low); it!=end; it++) {
-            auto& list = (*it).second;
-            for(auto& item : list) {
-                i++;
-                if(callback()==true) {
-
-                }
+    void RangeByKarma(int low, int high, Callback callback) const{
+        auto end = bykarma.upper_bound(high);
+        for(auto it = bykarma.lower_bound(low); it!=end; it++) {
+            for(auto item : (*it).second) {
+                if(callback(*item)==false)
+                    return;
             }
-
         }
+        return;
     }
 
+
+
     template <typename Callback>
-    void AllByUser(const string& user, Callback callback) const {
+    void AllByUser(const string& user, Callback callback) const{
         auto it = byuser.find(user);
-        for(auto item:(*it).second) {
-            callback;
+        if(it!=byuser.end()) {
+            for(auto item : (*it).second) {
+                if(callback(*item)==false)
+                    return;
+            }
         }
-
+        return;
     }
+
 private:
-    map<int, list<string>> bytime, bykarma;
-    unordered_map<string, list<string>> byuser;
-    unordered_map<string, Record> data;
+    map<int, list<Record*>> bytime, bykarma;
+    unordered_map<string, list<Record*>> byuser;
+    unordered_map<string, RecordWithIt> data;
 };
 
 void TestRangeBoundaries() {
@@ -146,5 +158,4 @@ int main() {
     RUN_TEST(tr, TestRangeBoundaries);
     RUN_TEST(tr, TestSameUser);
     RUN_TEST(tr, TestReplacement);
-    return 0;
 }
